@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <style type="text/css" media="screen">
+            #editor {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+            }
+        </style>
+
+        <script src="../back/webjars/jquery/3.2.1/dist/jquery.min.js"></script>
+
+    </head>
+    <body>
+
+        <div id="editor"></div>
+
+        <script src="../back/webjars/ace/1.3.3/src-min-noconflict/ace.js"></script>
+
+        <script>
+
+            $.ajax({
+                url: "../back/getFile",
+                data:({
+                    id: getParameter()
+                }),
+                success: function onSuccess(result) {
+                    showResult(result)
+                }
+            });
+
+            function getParameter() {
+                var url = new URL(window.location.href);
+                return url.searchParams.get("id");
+            }
+
+            function showResult(file) {
+                // document.getElementById("editor").innerHTML = file.content;
+                document.getElementsByTagName("title").item(0).innerText = file.name;
+                var editor = ace.edit("editor");
+                editor.setTheme("ace/theme/github");
+                editor.session.setMode("ace/mode/java");
+                editor.setReadOnly(true);
+                editor.setOptions({fontSize: "11pt"});
+                editor.setValue(file.content)
+                editor.clearSelection();
+            }
+        </script>
+
+    </body>
+</html>
