@@ -19,6 +19,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pro.kretov.repository.search.exception.JenkinsClientException;
+import pro.kretov.repository.search.index.entity.Repository;
 import pro.kretov.repository.search.jobs.Job;
 import pro.kretov.repository.search.jobs.Jobs;
 
@@ -38,7 +39,6 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * @date 25.02.2019
  */
 
-@SuppressWarnings("Duplicates")
 @Component
 public class JenkinsClient {
 
@@ -54,12 +54,12 @@ public class JenkinsClient {
 
     @PostConstruct
     public void postConstruct() {
-        HttpHost targetHost = new HttpHost("0001git02", 8080, "http");
+        HttpHost targetHost = new HttpHost("***", 8080, "http");
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 AuthScope.ANY,
-                new UsernamePasswordCredentials("avkretov", "avkretov"));
+                new UsernamePasswordCredentials("***", "***"));
 
         AuthCache authCache = new BasicAuthCache();
         authCache.put(targetHost, new BasicScheme());
@@ -79,25 +79,28 @@ public class JenkinsClient {
     }
 
     public Jobs getJobs() throws IOException {
-        HttpGet httpGet = new HttpGet("http://0001git02:8080/api/json?pretty=true");
+        HttpGet httpGet = new HttpGet("http://***/api/json?pretty=true");
         CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet, context);
         String json = IOUtils.toString(closeableHttpResponse.getEntity().getContent(), UTF_8);
         return gson.fromJson(json, Jobs.class);
     }
 
-    public ZipFile getZip(Job job) throws IOException, JenkinsClientException {
-        String address = "http://0001git02:8080/job/" + job.getName() + "/ws/*zip*/" + job.getName() + ".zip";
+    public Repository getRepository(Job job) throws IOException, JenkinsClientException {
+        String address = "http://***:8080/job/" + job.getName() + "/ws/*zip*/" + job.getName() + ".zip";
         HttpGet httpGet = new HttpGet(address);
         CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet, context);
         if (checkStatusCode(closeableHttpResponse)) {
             Path path = Paths.get("zip/" + job.getName() + ".zip");
             Files.copy(closeableHttpResponse.getEntity().getContent(), path, REPLACE_EXISTING);
-            return new ZipFile(path.toFile());
+            Repository repository = new Repository();
+            repository.setName(job.getName());
+            repository.setAddress(path.toString());
+            return repository;
         }
         throw new JenkinsClientException();
     }
 
-    public ZipFile getZip(String link, String name) throws IOException, JenkinsClientException {
+    public ZipFile getRepository(String link, String name) throws IOException, JenkinsClientException {
         HttpGet httpGet = new HttpGet(link);
         CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet, context);
         if (checkStatusCode(closeableHttpResponse)) {

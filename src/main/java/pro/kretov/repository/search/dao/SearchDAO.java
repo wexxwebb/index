@@ -69,7 +69,9 @@ public class SearchDAO {
         Session session = sessionFactory.getCurrentSession();
 
         NativeQuery<Word> nativeQuery =
-                session.createNativeQuery("select * from repository_index.public.word where sequence like :keyword", Word.class);
+                session.createNativeQuery(
+                        "select * from repository_index.public.word where sequence like :keyword limit 25",
+                        Word.class);
         nativeQuery.setParameter("keyword", sequence + "%");
 
         for (Word word : nativeQuery.getResultList()) {

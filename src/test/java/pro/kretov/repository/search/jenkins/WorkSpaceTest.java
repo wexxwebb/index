@@ -31,7 +31,7 @@ class WorkSpaceTest {
 //        for (Job job : jobs.getJobs()) {
 //            ZipFile zipFile;
 //            try {
-//                zipFile = jenkinsClient.getZip(job);
+//                zipFile = jenkinsClient.getRepository(job);
 //            } catch (JenkinsClientException e) {
 //                continue;
 //            }
