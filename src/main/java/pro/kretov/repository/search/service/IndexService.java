@@ -2,19 +2,13 @@ package pro.kretov.repository.search.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pro.kretov.repository.search.dao.*;
-import pro.kretov.repository.search.exception.JenkinsClientException;
 import pro.kretov.repository.search.index.entity.Repository;
-import pro.kretov.repository.search.index.entity.Word;
 import pro.kretov.repository.search.jenkins.JenkinsClient;
-import pro.kretov.repository.search.jobs.Job;
-import pro.kretov.repository.search.jobs.Jobs;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,7 +24,7 @@ public class IndexService {
     private static Logger logger = LoggerFactory.getLogger(IndexService.class);
 
     private ExecutorService executorService;
-    private List<Fut> futures = new CopyOnWriteArrayList<>();
+    private List<FutureIndexer> futures = new CopyOnWriteArrayList<>();
 
     private JenkinsClient jenkinsClient;
 //    private SaveDAO saveDAO;
@@ -145,10 +139,10 @@ public class IndexService {
                     }
                 }
                 Indexer indexer = new Indexer(fileDAO, wordDAO, filesWordsDAO, repository);
-                futures.add(new Fut(executorService.submit(indexer), repository.getName()));
-                if (++index > 2) {
-                    break;
-                }
+                futures.add(new FutureIndexer(executorService.submit(indexer), repository.getName()));
+//                if (++index > 2) {
+//                    break;
+//                }
             }
 
         } catch (IOException e) {
@@ -179,10 +173,10 @@ public class IndexService {
 
     private class ThrottlingController implements Runnable {
 
-        private List<Fut> futures;
+        private List<FutureIndexer> futures;
         private boolean stop = false;
 
-        private ThrottlingController(List<Fut> futures) {
+        private ThrottlingController(List<FutureIndexer> futures) {
             this.futures = futures;
         }
 
@@ -194,12 +188,12 @@ public class IndexService {
         public void run() {
             while (!stop) {
                 try {
-                      for (Fut fut : futures) {
-                        if (fut.getFuture().isDone()) {
+                      for (FutureIndexer futureIndexer : futures) {
+                        if (futureIndexer.getFuture().isDone()) {
                             synchronized (IndexService.class) {
                                 IndexService.class.notifyAll();
                             }
-                            futures.remove(fut);
+                            futures.remove(futureIndexer);
                             break;
                         }
                     }
