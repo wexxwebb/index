@@ -17,6 +17,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pro.kretov.repository.search.exception.JenkinsClientException;
 import pro.kretov.repository.search.index.entity.Repository;
@@ -39,6 +40,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * @date 25.02.2019
  */
 
+@SuppressWarnings("Duplicates")
 @Component
 public class JenkinsClient {
 
@@ -47,6 +49,21 @@ public class JenkinsClient {
 
     private final Gson gson;
 
+    @Value("${jenkins.address}")
+    private String jenkinsAddress;
+
+    @Value("${jenkins.username}")
+    private String jenkinsUser;
+
+    @Value("${jenkins.password")
+    private String jenkinsPassword;
+
+    @Value("${jenkins.protocol")
+    private String jenkinsProtocol;
+
+    @Value("${jenkins.port}")
+    private int jenkinsPort;
+
     @Autowired
     public JenkinsClient(Gson gson) {
         this.gson = gson;
@@ -54,12 +71,12 @@ public class JenkinsClient {
 
     @PostConstruct
     public void postConstruct() {
-        HttpHost targetHost = new HttpHost("***", 8080, "http");
+        HttpHost targetHost = new HttpHost(jenkinsUser, jenkinsPort, jenkinsProtocol);
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 AuthScope.ANY,
-                new UsernamePasswordCredentials("***", "***"));
+                new UsernamePasswordCredentials(jenkinsUser, jenkinsPassword));
 
         AuthCache authCache = new BasicAuthCache();
         authCache.put(targetHost, new BasicScheme());
@@ -79,14 +96,14 @@ public class JenkinsClient {
     }
 
     public Jobs getJobs() throws IOException {
-        HttpGet httpGet = new HttpGet("http://***/api/json?pretty=true");
+        HttpGet httpGet = new HttpGet(jenkinsAddress + "/api/json?pretty=true");
         CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet, context);
         String json = IOUtils.toString(closeableHttpResponse.getEntity().getContent(), UTF_8);
         return gson.fromJson(json, Jobs.class);
     }
 
     public Repository getRepository(Job job) throws IOException, JenkinsClientException {
-        String address = "http://***:8080/job/" + job.getName() + "/ws/*zip*/" + job.getName() + ".zip";
+        String address = jenkinsAddress + "/job/" + job.getName() + "/ws/*zip*/" + job.getName() + ".zip";
         HttpGet httpGet = new HttpGet(address);
         CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet, context);
         if (checkStatusCode(closeableHttpResponse)) {

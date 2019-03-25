@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <html>
 
     <head>
@@ -10,10 +11,28 @@
         <script src="/back/webjars/jquery-ui/1.12.1/jquery-ui.min.js"></script>
     </head>
 
-    <body>
+    <body onload="$('#sequence').focus()">
         <div class="container-fluid">
+
             <div class="row justify-content-center">
                 <div class="col-8">
+                    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/search">Home <span class="sr-only"></span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/search/create-index.html">Index</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
                     <form onsubmit="searchSequence(); return false;">
                         <div class="form-group">
                             <label for="sequence">Search</label>
@@ -39,15 +58,15 @@
             source: "/back/searchSequence?", // url-адрес
             minLength: 1,
             select: function (event, ui) {
-                search(ui.item.id)
+                search(ui.item.label)
             }
         });
 
-        function search(id) {
+        function search(sequence) {
             $.ajax({
                 url: "/back/getWord",
                 data: ({
-                    id: id
+                    sequence: sequence
                 }),
                 success: function onSuccess(result) {
                     showResult(result)
@@ -67,24 +86,22 @@
             });
         }
 
-        function showResult(words) {
+        function showResult(files) {
             document.getElementById("result").innerHTML = "";
-            for (var i = 0; i < words.length; i++) {
+            for (var i = 0; i < files.length; i++) {
                 //{"id":25,"name":"Гиперэкстензия"}
-                for (var j = 0; j < words[i].files.length; j++) {
-                    var tbody = document.getElementById("result");
+                var tbody = document.getElementById("result");
 
-                    var row = tbody.insertRow(tbody.rows.length);
-                    var repository = row.insertCell(0);
-                    repository.innerText = String(words[i].files[j].repository.name);
+                var row = tbody.insertRow(tbody.rows.length);
+                var repository = row.insertCell(0);
+                repository.innerText = String(files[i].repository.name);
 
-                    var fileName = row.insertCell(1);
-                    fileName.innerHTML =
-                        "<a target=\"_blank\" rel=\"noopener noreferrer\"" +
-                        " href='/search/editor.html?id=" + words[i].files[j].id + "'>"
-                        + String(words[i].files[j].name) +
-                        "</a>";
-                }
+                var fileName = row.insertCell(1);
+                fileName.innerHTML =
+                    "<a target=\"_blank\" rel=\"noopener noreferrer\"" +
+                    " href='/search/editor.html?id=" + files[i].id + "'>"
+                    + String(files[i].name) +
+                    "</a>";
             }
             $('#sequence').autocomplete( "close" );
         }

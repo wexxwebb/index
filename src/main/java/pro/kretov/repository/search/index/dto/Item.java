@@ -1,22 +1,14 @@
 package pro.kretov.repository.search.index.dto;
 
-public class Item {
+import java.util.Objects;
 
-    private Long id;
+public class Item implements Comparable {
+
 
     private String label;
 
-    public Item(Long id, String label) {
-        this.id = id;
+    public Item(String label) {
         this.label = label;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getLabel() {
@@ -25,5 +17,23 @@ public class Item {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return Objects.equals(label, item.label);
+    }
+
+    @Override
+    public int hashCode() {
+        return getLabel().hashCode();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return label.compareTo(((Item)o).label);
     }
 }

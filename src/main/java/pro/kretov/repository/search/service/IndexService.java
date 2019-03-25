@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pro.kretov.repository.search.dao.SaveDAO;
+import pro.kretov.repository.search.dao.*;
 import pro.kretov.repository.search.exception.JenkinsClientException;
 import pro.kretov.repository.search.index.entity.Repository;
 import pro.kretov.repository.search.index.entity.Word;
@@ -33,21 +33,32 @@ public class IndexService {
     private List<Fut> futures = new CopyOnWriteArrayList<>();
 
     private JenkinsClient jenkinsClient;
-    private SaveDAO saveDAO;
+//    private SaveDAO saveDAO;
 
-    private Map<String, Word> words;
+    private RepositoryDAO repositoryDAO;
 
-    @Autowired
-    public IndexService(JenkinsClient jenkinsClient, SaveDAO saveDAO) {
-        this.jenkinsClient = jenkinsClient;
-        this.saveDAO = saveDAO;
+    private FileDAO fileDAO;
+
+    private WordDAO wordDAO;
+
+    private FilesWordsDAO filesWordsDAO;
+
+    public IndexService(RepositoryDAO repositoryDAO, FileDAO fileDAO, WordDAO wordDAO, FilesWordsDAO filesWordsDAO) {
+        this.repositoryDAO = repositoryDAO;
+        this.fileDAO = fileDAO;
+        this.wordDAO = wordDAO;
+        this.filesWordsDAO = filesWordsDAO;
     }
 
-    public void createIndex() {
+    //    @Autowired
+//    public IndexService(JenkinsClient jenkinsClient, SaveDAO saveDAO) {
+//        this.jenkinsClient = jenkinsClient;
+//        this.saveDAO = saveDAO;
+//    }
+
+    public void createIndex() throws DAOException {
 
 //        try {
-//
-            words = new ConcurrentHashMap<>();
 //
 //            ZipFile zipFile = jenkinsClient.getRepository(
 //                    "https://github.com/wexxwebb/sport_schedule/archive/spring_security_rmi_hibernate.zip",
@@ -88,17 +99,41 @@ public class IndexService {
         thread.start();
 
         int index = 0;
-        try {
-            Jobs jobs = jenkinsClient.getJobs();
-            for (Job job : jobs.getJobs()) {
-                Repository repository;
-                try {
-                    repository = jenkinsClient.getRepository(job);
-                } catch (JenkinsClientException e) {
-                    continue;
-                }
+        List<Repository> list = new ArrayList<>();
+        Repository repository1 = new Repository();
+        repository1.setName("RoutingCore");
+        repository1.setAddress("zip/RoutingCore.zip");
+        list.add(repository1);
 
-                saveDAO.persist(repository);
+        Repository repository2 = new Repository();
+        repository2.setName("AmberAdapter");
+        repository2.setAddress("zip/AmberAdapter.zip");
+        list.add(repository2);
+
+        Repository repository3 = new Repository();
+        repository3.setName("ApiManager");
+        repository3.setAddress("zip/ApiManager.zip");
+        list.add(repository3);
+
+        Repository repository4 = new Repository();
+        repository4.setName("sport_schedule");
+        repository4.setAddress("zip/sport_schedule.zip");
+        list.add(repository4);
+
+        try {
+//            Jobs jobs = jenkinsClient.getJobs();
+//            for (Job job : jobs.getJobs()) {
+            for (Repository repository : list) {
+//                Repository repository;
+//                try {
+//                    repository = jenkinsClient.getRepository(job);
+//                } catch (JenkinsClientException e) {
+//                    continue;
+//                }
+
+//                saveDAO.persist(repository);
+                repositoryDAO.save(repository);
+
 
                 if (futures.size() > 10) {
                     synchronized (IndexService.class) {
@@ -109,7 +144,7 @@ public class IndexService {
                         }
                     }
                 }
-                Indexer indexer = new Indexer(words, saveDAO, repository);
+                Indexer indexer = new Indexer(fileDAO, wordDAO, filesWordsDAO, repository);
                 futures.add(new Fut(executorService.submit(indexer), repository.getName()));
                 if (++index > 2) {
                     break;
@@ -159,7 +194,7 @@ public class IndexService {
         public void run() {
             while (!stop) {
                 try {
-                    for (Fut fut : futures) {
+                      for (Fut fut : futures) {
                         if (fut.getFuture().isDone()) {
                             synchronized (IndexService.class) {
                                 IndexService.class.notifyAll();
@@ -176,6 +211,6 @@ public class IndexService {
     }
 
     public void clearIndex() {
-        saveDAO.clear();
+//        saveDAO.clear();
     }
 }

@@ -4,8 +4,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.CascadeType.*;
-
 /**
  * @author Aleksandr Kretov
  * @date 25.02.2019
@@ -14,7 +12,7 @@ import static javax.persistence.CascadeType.*;
 @Entity
 public class Repository {
 
-    private Long id;
+    private String id;
 
     private String name;
 
@@ -24,11 +22,11 @@ public class Repository {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

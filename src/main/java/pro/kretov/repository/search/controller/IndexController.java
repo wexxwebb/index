@@ -4,13 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pro.kretov.repository.search.index.dto.FileDTO;
+import pro.kretov.repository.search.dao.DAOException;
 import pro.kretov.repository.search.index.dto.Item;
-import pro.kretov.repository.search.index.dto.WordDTO;
+import pro.kretov.repository.search.index.entity.File;
+import pro.kretov.repository.search.index.entity.Word;
 import pro.kretov.repository.search.service.IndexService;
 import pro.kretov.repository.search.service.SearchService;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -24,6 +26,12 @@ public class IndexController {
     private IndexService indexService;
     private SearchService searchService;
 
+//    @Autowired
+//    public IndexController(IndexService indexService) {
+//
+//        this.indexService = indexService;
+//    }
+
     @Autowired
     public IndexController(IndexService indexService, SearchService searchService) {
         this.indexService = indexService;
@@ -31,7 +39,7 @@ public class IndexController {
     }
 
     @GetMapping(value = "/create")
-    private void createIndex() {
+    private void createIndex() throws DAOException {
         indexService.createIndex();
     }
 
@@ -41,22 +49,22 @@ public class IndexController {
     }
 
     @GetMapping(value = "/back/getWord")
-    private List<WordDTO> search(@RequestParam Long id) {
-        return searchService.getWord(id);
+    private List<File> search(@RequestParam String sequence) throws DAOException {
+        return searchService.getWord(sequence);
     }
 
     @GetMapping(value = "/back/getFile")
-    private FileDTO getFile(@RequestParam Long id) throws IOException {
+    private File getFile(@RequestParam String id) throws IOException, DAOException {
         return searchService.getFile(id);
     }
 
     @GetMapping(value = "/back/searchSequence")
-    private List<Item> searchSequence(@RequestParam String term) {
+    private Collection<Item> searchSequence(@RequestParam String term) throws DAOException {
         return searchService.searchSequence(term);
     }
 
     @GetMapping(value = "/back/searchWord")
-    private List<WordDTO> searchWord(@RequestParam String sequence) {
+    private List<Word> searchWord(@RequestParam String sequence) {
         return searchService.searchWord(sequence);
     }
 }
