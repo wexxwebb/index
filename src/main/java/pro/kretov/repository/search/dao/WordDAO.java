@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import pro.kretov.repository.search.index.entity.Word;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.UUID;
 
 @Service
@@ -19,6 +16,17 @@ public class WordDAO {
     @Autowired
     public WordDAO(DataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    public void index() throws DAOException {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into words (sequence) select distinct word from files_words"
+            );
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
     }
 
     public Word save(Word word) throws DAOException {

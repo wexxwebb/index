@@ -161,6 +161,7 @@ public class IndexService {
 
         executorService.shutdown();
         throttlingController.stop();
+        wordDAO.index();
     }
 
 //    private int count() {
