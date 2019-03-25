@@ -55,10 +55,10 @@ public class JenkinsClient {
     @Value("${jenkins.username}")
     private String jenkinsUser;
 
-    @Value("${jenkins.password")
+    @Value("${jenkins.password}")
     private String jenkinsPassword;
 
-    @Value("${jenkins.protocol")
+    @Value("${jenkins.protocol}")
     private String jenkinsProtocol;
 
     @Value("${jenkins.port}")

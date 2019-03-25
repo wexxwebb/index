@@ -45,7 +45,8 @@
             <div class="row justify-content-center">
                 <div class="col-8">
                     <table class="table table-striped">
-                        <tbody id="result" class="local-result-table"></tbody>
+                        <tbody id="result" class="local-result-table">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -56,13 +57,33 @@
 
         $('#sequence').autocomplete({
             source: "/back/searchSequence?", // url-адрес
-            minLength: 1,
+            minLength: 2,
+            search: function (event, ui) {
+                    spinner(true)
+                },
+            response: function (enent, ui) {
+                    spinner(false)
+                },
             select: function (event, ui) {
                 search(ui.item.label)
             }
         });
 
+        function spinner(show) {
+            if (show) {
+                document.getElementById("result").innerHTML =
+                    "<div class=\"d-flex text-primary justify-content-center\">" +
+                    "    <div class=\"spinner-border\" role=\"status\">" +
+                    "        <span class=\"sr-only\">Loading...</span>" +
+                    "   </div>" +
+                    "</div>";
+            } else {
+                document.getElementById("result").innerHTML = "";
+            }
+        }
+
         function search(sequence) {
+            spinner(true);
             $.ajax({
                 url: "/back/getWord",
                 data: ({

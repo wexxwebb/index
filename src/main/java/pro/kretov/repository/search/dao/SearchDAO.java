@@ -22,18 +22,18 @@ public class SearchDAO {
     }
 
     public Collection<Item> searchSequence(String sequence) throws DAOException {
-        Set<Item> result = new TreeSet<>();
+        List<Item> result = new ArrayList<>();
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select word from repository_index.public.files_words where " +
-                            "word like ?"
+                    "select sequence from repository_index.public.words where " +
+                            "sequence like ? order by sequence asc"
             );
             preparedStatement.setString(1, sequence + "%");
             preparedStatement.execute();
             ResultSet resultSet = preparedStatement.getResultSet();
             while (resultSet.next()) {
                 Item item = new Item(
-                        resultSet.getString("word"));
+                        resultSet.getString("sequence"));
                 result.add(item);
             }
             return result;
