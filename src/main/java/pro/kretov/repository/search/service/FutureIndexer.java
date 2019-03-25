@@ -7,12 +7,12 @@ import java.util.concurrent.Future;
  * @date 26.02.2019
  */
 
-public class Fut {
+public class FutureIndexer {
 
     private Future future;
     private String name;
 
-    public Fut(Future future, String name) {
+    public FutureIndexer(Future future, String name) {
         this.future = future;
         this.name = name;
     }
