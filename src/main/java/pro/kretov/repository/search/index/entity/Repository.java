@@ -1,34 +1,17 @@
 package pro.kretov.repository.search.index.entity;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Aleksandr Kretov
  * @date 25.02.2019
  */
 
-@Entity
 public class Repository {
-
-    private String id;
 
     private String name;
 
     private String address;
-
-    private List<File> files = new ArrayList<>();
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -46,12 +29,17 @@ public class Repository {
         this.address = address;
     }
 
-    @OneToMany(mappedBy = "repository", targetEntity = File.class)
-    public List<File> getFiles() {
-        return files;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Repository that = (Repository) o;
+        return name.equals(that.name) &&
+                address.equals(that.address);
     }
 
-    public void setFiles(List<File> files) {
-        this.files = files;
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, address);
     }
 }

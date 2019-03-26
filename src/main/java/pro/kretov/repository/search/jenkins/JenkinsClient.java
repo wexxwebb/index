@@ -25,7 +25,6 @@ import pro.kretov.repository.search.jobs.Job;
 import pro.kretov.repository.search.jobs.Jobs;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

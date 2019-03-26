@@ -2,6 +2,7 @@ package pro.kretov.repository.search.dao;
 
 import org.springframework.stereotype.Service;
 import pro.kretov.repository.search.index.dto.Item;
+import pro.kretov.repository.search.index.entity.Entrance;
 import pro.kretov.repository.search.index.entity.File;
 import pro.kretov.repository.search.index.entity.Repository;
 
@@ -42,13 +43,11 @@ public class SearchDAO {
         }
     }
 
-    public List<File> getWord(String sequence) throws DAOException {
-        List<File> result = new ArrayList<>();
+    public List<Entrance> getWord(String sequence) throws DAOException {
+        List<Entrance> result = new ArrayList<>();
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select r.name repo_name, r.address repo_path, f.id file_id, f.name file_name from files_words fw" +
-                            " inner join files f on fw.file_id = f.id" +
-                            " inner join repositories r on r.id = f.repository_id where word = ?; "
+                    "select * from entrances where sequence = ?; "
             );
             preparedStatement.setString(1, sequence);
             preparedStatement.execute();
@@ -65,11 +64,9 @@ public class SearchDAO {
 
     private File buildFile(ResultSet resultSet) throws SQLException {
         Repository repository = new Repository();
-        repository.setName(resultSet.getString("repo_name"));
-        repository.setAddress(resultSet.getString("repo_path"));
+        repository.setName(resultSet.getString("repository_name"));
+        repository.setAddress(resultSet.getString("repository_path"));
         File file = new File();
-        file.setRepository(repository);
-        file.setId(resultSet.getString("file_id"));
         file.setName(resultSet.getString("file_name"));
         return file;
     }
@@ -77,7 +74,7 @@ public class SearchDAO {
     public File getFile(String id) throws DAOException {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "select f.id file_id, r.name repo_name, r.address repo_path, f.name file_name from files f " +
+                    "select sequence from entrance f " +
                             "inner join repositories r on f.repository_id = r.id where f.id = ?"
             );
             preparedStatement.setString(1, id);

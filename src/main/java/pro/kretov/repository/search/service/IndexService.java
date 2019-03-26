@@ -2,6 +2,7 @@ package pro.kretov.repository.search.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pro.kretov.repository.search.dao.*;
 import pro.kretov.repository.search.index.entity.Repository;
@@ -27,21 +28,15 @@ public class IndexService {
     private List<FutureIndexer> futures = new CopyOnWriteArrayList<>();
 
     private JenkinsClient jenkinsClient;
-//    private SaveDAO saveDAO;
-
-    private RepositoryDAO repositoryDAO;
-
-    private FileDAO fileDAO;
 
     private WordDAO wordDAO;
 
-    private FilesWordsDAO filesWordsDAO;
+    private EntranceDAO entranceDAO;
 
-    public IndexService(RepositoryDAO repositoryDAO, FileDAO fileDAO, WordDAO wordDAO, FilesWordsDAO filesWordsDAO) {
-        this.repositoryDAO = repositoryDAO;
-        this.fileDAO = fileDAO;
+    @Autowired
+    public IndexService(WordDAO wordDAO, EntranceDAO entranceDAO) {
         this.wordDAO = wordDAO;
-        this.filesWordsDAO = filesWordsDAO;
+        this.entranceDAO = entranceDAO;
     }
 
     //    @Autowired
@@ -126,8 +121,6 @@ public class IndexService {
 //                }
 
 //                saveDAO.persist(repository);
-                repositoryDAO.save(repository);
-
 
                 if (futures.size() > 10) {
                     synchronized (IndexService.class) {
@@ -138,7 +131,7 @@ public class IndexService {
                         }
                     }
                 }
-                Indexer indexer = new Indexer(fileDAO, wordDAO, filesWordsDAO, repository);
+                Indexer indexer = new Indexer(entranceDAO, repository);
                 futures.add(new FutureIndexer(executorService.submit(indexer), repository.getName()));
 //                if (++index > 2) {
 //                    break;

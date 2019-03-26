@@ -33,10 +33,10 @@ public class SearchService {
 
     public File getFile(String id) throws IOException, DAOException {
         File file = searchDAO.getFile(id);
-        ZipFile zipFile = new ZipFile(file.getRepository().getAddress());
-        ZipEntry zipEntry = zipFile.getEntry(file.getName());
-        String content = IOUtils.toString(zipFile.getInputStream(zipEntry), UTF_8);
-        file.setContent(content);
+//        ZipFile zipFile = new ZipFile(file.getRepository().getAddress());
+//        ZipEntry zipEntry = zipFile.getEntry(file.getName());
+//        String content = IOUtils.toString(zipFile.getInputStream(zipEntry), UTF_8);
+//        file.setContent(content);
         return file;
     }
 

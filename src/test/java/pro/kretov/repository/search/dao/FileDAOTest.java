@@ -1,13 +1,6 @@
 package pro.kretov.repository.search.dao;
 
 import org.junit.jupiter.api.Test;
-import pro.kretov.repository.search.config.PersistenceConfiguration;
-import pro.kretov.repository.search.index.entity.File;
-import pro.kretov.repository.search.index.entity.Repository;
-
-import javax.sql.DataSource;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class FileDAOTest {
 
